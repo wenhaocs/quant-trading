@@ -21,6 +21,7 @@
 # https://www.tradingview.com/wiki/Bollinger_Bands_(BB)
 
 import os
+import sys, getopt
 import pandas as pd
 import matplotlib.pyplot as plt
 import copy
@@ -39,7 +40,7 @@ os.chdir('d:/')
 def bollinger_bands(df):
     
     data=copy.deepcopy(df)
-    data['std']=data['price'].rolling(window=20,min_periods=20).std()
+    data['std']=data['Adj Close'].rolling(window=20,min_periods=20).std()
     data['mid band']=data['price'].rolling(window=20,min_periods=20).mean()
     data['upper band']=data['mid band']+2*data['std']
     data['lower band']=data['mid band']-2*data['std']
@@ -218,11 +219,11 @@ def plot(new):
 # In[6]:
 
 #ta-da
-def main():
+def main(inputfile):
     
     #again, i download data from histdata.com
     #and i take the average of bid and ask price
-    df=pd.read_csv('gbpusd.csv')
+    df=pd.read_csv(inputfile)
     
     signals=signal_generation(df,bollinger_bands)
 
@@ -234,4 +235,16 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    argv = sys.argv[1:]
+    try:
+      opts, args = getopt.getopt(argv,"hf:",["file="])
+    except getopt.GetoptError:
+      print 'this_file.py -f <inputfile>'
+      sys.exit(2)
+    for opt, arg in opts:
+      if opt == '-h':
+         print 'this_file.py -f <inputfile>'
+         sys.exit()
+      elif opt in ("-f", "--file"):
+         inputfile = arg
+    main(inputfile)
